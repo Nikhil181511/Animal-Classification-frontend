@@ -1,17 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import ReactDOM from 'react-dom/client';  // Import from 'react-dom/client' for React 18 and above
+import BarcodeScanner from './Predict';  // Import BarcodeScanner
+import './index.css'; // Assuming you have an index.css file for global styles
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')); // Create the root using createRoot
 root.render(
   <React.StrictMode>
-    <App />
+    <BarcodeScanner />  {/* Rendering BarcodeScanner Component */}
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
