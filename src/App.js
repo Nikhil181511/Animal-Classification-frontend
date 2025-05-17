@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Prediction from "./Predict"; 
+import Prediction from "./Pages/Predict"; 
 
 function App() {
     return (
