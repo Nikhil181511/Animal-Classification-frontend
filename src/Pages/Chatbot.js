@@ -17,7 +17,7 @@ const PopupChatbot = ({ prediction: animalName }) => {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const API_URL = process.env.REACT_APP_API_URL || "https://animal-classification-backend.onrender.com";
 
       const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
