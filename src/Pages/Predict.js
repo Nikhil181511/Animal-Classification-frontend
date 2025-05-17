@@ -13,17 +13,27 @@ const Predict = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        const getCameraStream = async () => {
+            try {
+                const constraints = {
+                    video: useWebcam
+                        ? { facingMode: { ideal: "environment" } } // Prefer back camera
+                        : false
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    videoRef.current.play();
+                }
+            } catch (err) {
+                console.error(err);
+                setError('Error accessing webcam: ' + err.message);
+            }
+        };
+
         if (useWebcam) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then((stream) => {
-                    if (videoRef.current) {
-                        videoRef.current.srcObject = stream;
-                        videoRef.current.play();
-                    }
-                })
-                .catch((err) => {
-                    setError('Error accessing webcam: ' + err.message);
-                });
+            getCameraStream();
         } else {
             if (videoRef.current && videoRef.current.srcObject) {
                 const tracks = videoRef.current.srcObject.getTracks();
@@ -32,7 +42,7 @@ const Predict = () => {
             }
         }
 
-        // Cleanup function to ensure camera is turned off when component unmounts
+        // Cleanup when component unmounts
         return () => {
             if (videoRef.current && videoRef.current.srcObject) {
                 const tracks = videoRef.current.srcObject.getTracks();
@@ -48,7 +58,6 @@ const Predict = () => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 setImagePreview(event.target.result);
-                // Reset prediction and error
                 setPrediction('');
                 setError('');
             };
@@ -113,7 +122,6 @@ const Predict = () => {
     };
 
     const handleTabClick = (useWebcamValue) => {
-        // Clear previous results when switching tabs
         setPrediction('');
         setError('');
         setImagePreview(null);
@@ -123,92 +131,92 @@ const Predict = () => {
 
     return (
         <div>
-        <div className="predict-container">
-            <h2>Animal Classifier</h2>
+            <div className="predict-container">
+                <h2>Animal Classifier</h2>
 
-            <div className="toggle-buttons">
-                <button
-                    className={!useWebcam ? "active" : ""}
-                    onClick={() => handleTabClick(false)}
-                >
-                    <i className="fas fa-upload"></i> Upload Image
-                </button>
-                <button
-                    className={useWebcam ? "active" : ""}
-                    onClick={() => handleTabClick(true)}
-                >
-                    <i className="fas fa-camera"></i> Use Webcam
-                </button>
-            </div>
-
-            {!useWebcam ? (
-                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-                    <label className="file-upload-label">
-                        <div className="upload-icon">
-                            <i className="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div className="upload-text">
-                            <p>Drop your animal image here</p>
-                            <p className="upload-subtext">or click to browse files</p>
-                        </div>
-                        <input
-                            type="file"
-                            name="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                        />
-                    </label>
-
-                    {selectedFile && (
-                        <input
-                            type="submit"
-                            value={isLoading ? "Processing..." : "Identify Animal"}
-                            disabled={isLoading}
-                        />
-                    )}
-                </form>
-            ) : (
-                <div className="webcam-container">
-                    <video ref={videoRef} width="400" height="300" />
-                    <canvas ref={canvasRef} width="400" height="300" style={{ display: 'none' }} />
+                <div className="toggle-buttons">
                     <button
-                        onClick={captureFromWebcam}
-                        disabled={isLoading}
+                        className={!useWebcam ? "active" : ""}
+                        onClick={() => handleTabClick(false)}
                     >
-                        <i className="fas fa-camera"></i> {isLoading ? "Processing..." : "Capture & Identify"}
+                        <i className="fas fa-upload"></i> Upload Image
+                    </button>
+                    <button
+                        className={useWebcam ? "active" : ""}
+                        onClick={() => handleTabClick(true)}
+                    >
+                        <i className="fas fa-camera"></i> Use Webcam
                     </button>
                 </div>
-            )}
 
-            {imagePreview && (
-                <div className="image-preview-container">
-                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                </div>
-            )}
+                {!useWebcam ? (
+                    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                        <label className="file-upload-label">
+                            <div className="upload-icon">
+                                <i className="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div className="upload-text">
+                                <p>Drop your animal image here</p>
+                                <p className="upload-subtext">or click to browse files</p>
+                            </div>
+                            <input
+                                type="file"
+                                name="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        </label>
 
-            {isLoading && (
-                <div className="loading-indicator">
-                    <div className="spinner"></div>
-                    <p>Analyzing image...</p>
-                </div>
-            )}
+                        {selectedFile && (
+                            <input
+                                type="submit"
+                                value={isLoading ? "Processing..." : "Identify Animal"}
+                                disabled={isLoading}
+                            />
+                        )}
+                    </form>
+                ) : (
+                    <div className="webcam-container">
+                        <video ref={videoRef} width="400" height="300" />
+                        <canvas ref={canvasRef} width="400" height="300" style={{ display: 'none' }} />
+                        <button
+                            onClick={captureFromWebcam}
+                            disabled={isLoading}
+                        >
+                            <i className="fas fa-camera"></i> {isLoading ? "Processing..." : "Capture & Identify"}
+                        </button>
+                    </div>
+                )}
 
-            {prediction && (
-                <div className="prediction-result">
-                    <i className="fas fa-paw"></i> Prediction: <span className="prediction-text">{prediction}</span>
-                </div>
-            )}
+                {imagePreview && (
+                    <div className="image-preview-container">
+                        <img src={imagePreview} alt="Preview" className="image-preview" />
+                    </div>
+                )}
 
-            {error && (
-                <div className="prediction-error">
-                    <i className="fas fa-exclamation-circle"></i> {error}
-                </div>
-            )}
-            
-        </div>
-        {/* Chatbot Component */}
-            <Chatbot animalName={prediction} />
+                {isLoading && (
+                    <div className="loading-indicator">
+                        <div className="spinner"></div>
+                        <p>Analyzing image...</p>
+                    </div>
+                )}
+
+                {prediction && (
+                    <div className="prediction-result">
+                        <i className="fas fa-paw"></i> Prediction: <span className="prediction-text">{prediction}</span>
+                    </div>
+                )}
+
+                {error && (
+                    <div className="prediction-error">
+                        <i className="fas fa-exclamation-circle"></i> {error}
+                    </div>
+                )}
             </div>
+
+            {/* Chatbot Component */}
+            <Chatbot animalName={prediction} />
+        </div>
     );
 };
 
