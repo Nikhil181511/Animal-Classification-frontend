@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 
 # Set up Gemini API
-GEMINI_KEY = "AIzaSyASuqtC0x-oMcRmmIDwY9h5_K-eDXnAoVI"
+GEMINI_KEY = ""
 genai.configure(api_key=GEMINI_KEY)
 
 # Gemini Pro model
