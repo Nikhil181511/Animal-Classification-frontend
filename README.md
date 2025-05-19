@@ -31,7 +31,7 @@ The goal of this project is to build a reliable image classifier that can accura
 
 - **Architecture**: ResNet18 (pretrained on ImageNet)
 - **Framework**: PyTorch
-- **Transfer Learning**: Last fully connected layer modified to match 18 classes
+- **Transfer Learning**: Last fully connected layer modified to match 19 classes
 - **Loss Function**: CrossEntropyLoss
 - **Optimizer**: Adam
 
