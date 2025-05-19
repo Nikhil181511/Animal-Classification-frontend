@@ -4,6 +4,7 @@ import Chatbot from "./Chatbot";
 
 const Predict = () => {
     const [imagePreview, setImagePreview] = useState(null);
+    const [confidence] = useState('');
     const [prediction, setPrediction] = useState('');
     const [error, setError] = useState('');
     const [useWebcam, setUseWebcam] = useState(false);
@@ -13,18 +14,20 @@ const Predict = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        const videoElement = videoRef.current; // ✅ Capture ref locally
+
         const getCameraStream = async () => {
             try {
                 const constraints = {
                     video: useWebcam
-                        ? { facingMode: { ideal: "environment" } } // Prefer back camera
+                        ? { facingMode: { ideal: "environment" } }
                         : false
                 };
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    videoRef.current.play();
+                if (videoElement) {
+                    videoElement.srcObject = stream;
+                    videoElement.play();
                 }
             } catch (err) {
                 console.error(err);
@@ -35,21 +38,21 @@ const Predict = () => {
         if (useWebcam) {
             getCameraStream();
         } else {
-            if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = videoRef.current.srcObject.getTracks();
+            if (videoElement && videoElement.srcObject) {
+                const tracks = videoElement.srcObject.getTracks();
                 tracks.forEach((track) => track.stop());
-                videoRef.current.srcObject = null;
+                videoElement.srcObject = null;
             }
         }
 
-        // Cleanup when component unmounts
         return () => {
-            if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = videoRef.current.srcObject.getTracks();
+            if (videoElement && videoElement.srcObject) {
+                const tracks = videoElement.srcObject.getTracks();
                 tracks.forEach((track) => track.stop());
             }
         };
     }, [useWebcam]);
+
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -106,8 +109,8 @@ const Predict = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                if (data.prediction) {
-                    setPrediction(`${data.prediction}`);
+                if (data.prediction && data.confidence) {
+                    setPrediction(`${data.prediction} (Confidence: ${data.confidence})`);
                 } else {
                     setError('No prediction returned. Please try again.');
                 }
@@ -204,6 +207,11 @@ const Predict = () => {
                 {prediction && (
                     <div className="prediction-result">
                         <i className="fas fa-paw"></i> Prediction: <span className="prediction-text">{prediction}</span>
+                        {confidence && (
+                            <div className="confidence-score">
+                                <i className="fas fa-chart-line"></i> Confidence: <span>{confidence}</span>
+                            </div>
+                        )}
                     </div>
                 )}
 
